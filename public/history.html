@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoSim - Trading History</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+        // Check authentication before loading
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/login';
+        }
+    </script>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-left">
+                <div class="logo">
+                    <i class="fab fa-bitcoin"></i>
+                    <span>CryptoSim</span>
+                </div>
+                <div class="nav-menu">
+                    <a href="/" class="nav-item" id="nav-trade">Trade</a>
+                    <a href="/?page=markets" class="nav-item" id="nav-markets">Markets</a>
+                    <a href="/history" class="nav-item active">History</a>
+                    <a href="/social" class="nav-item">Social</a>
+                </div>
+            </div>
+            <div class="nav-right">
+                <div class="welcome-message">
+                    <span>Welcome! <span id="current-user">User</span>
+                </div>
+                <div class="account-info">
+                    <div class="wallet-summary">
+                        <div class="wallet-item">
+                            <span class="wallet-label">USDT Balance</span>
+                            <span class="wallet-value" id="krw-balance">$10,000.00</span>
+                        </div>
+                        <div class="wallet-item">
+                            <span class="wallet-label" id="crypto-balance-label">BTC Balance</span>
+                            <span class="wallet-value" id="btc-balance">0.00000000</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-dropdown">
+                    <button class="user-menu-trigger">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/settings" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Account Settings
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="history-wrapper">
+        <!-- Asset Trend Chart -->
+        <div class="asset-trend-section">
+            <div class="section-header">
+                <h2>Asset Trend</h2>
+                <div class="trend-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Assets</span>
+                        <span class="stat-value" id="total-assets">$10,000.00</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total P&L</span>
+                        <span class="stat-value" id="total-pnl">$0.00</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Return</span>
+                        <span class="stat-value" id="total-return">0.00%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="asset-trend-chart" class="asset-chart" width="800" height="400"></canvas>
+            </div>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="transaction-history-section">
+            <div class="section-header">
+                <h2>Transaction History</h2>
+                <div class="history-controls">
+                    <div class="filter-controls">
+                        <select id="transaction-filter" class="filter-select">
+                            <option value="all">All Transactions</option>
+                            <option value="buy">Buy Orders</option>
+                            <option value="sell">Sell Orders</option>
+                            <option value="close_long">Close Long</option>
+                            <option value="close_short">Close Short</option>
+                            <option value="liquidation">Liquidations</option>
+                        </select>
+                        <button id="export-csv-btn" class="export-btn">
+                            <i class="fas fa-download"></i> Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="transaction-table-container">
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th>Fee</th>
+                            <th>P&L</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transaction-table-body">
+                        <!-- Transaction rows will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Trading Statistics -->
+        <div class="trading-stats-section">
+            <div class="section-header">
+                <h2>Trading Statistics</h2>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-title">Total Trades</span>
+                        <span class="stat-number" id="total-trades">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-title">Winning Trades</span>
+                        <span class="stat-number" id="winning-trades">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-title">Losing Trades</span>
+                        <span class="stat-number" id="losing-trades">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-title">Win Rate</span>
+                        <span class="stat-number" id="win-rate">0%</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-title">Average P&L</span>
+                        <span class="stat-number" id="avg-pnl">$0.00</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-title">Total Fees</span>
+                        <span class="stat-number" id="total-fees">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Chat -->
+    <div class="chat-container" id="chat-container">
+        <div class="chat-header">
+            <div class="chat-title">
+                <i class="fas fa-comments"></i>
+                Community Chat
+                <span class="online-count" id="online-count">(0 online)</span>
+            </div>
+            <button class="chat-minimize" id="chat-minimize">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-welcome">
+                Welcome to CryptoSim Community Chat!<br>
+                Share your trades and strategies with other traders.
+            </div>
+        </div>
+        <div class="chat-input-wrapper">
+            <div class="chat-suggestions hidden" id="chat-suggestions">
+                <div class="suggestion-item" data-command="/share">
+                    <span class="suggestion-command">/share</span>
+                    <span class="suggestion-description">Share your last trade</span>
+                </div>
+                <div class="suggestion-item" data-command="/stats">
+                    <span class="suggestion-command">/stats</span>
+                    <span class="suggestion-description">Show your trading statistics</span>
+                </div>
+                <div class="suggestion-item" data-command="/clear">
+                    <span class="suggestion-command">/clear</span>
+                    <span class="suggestion-description">Clear chat history</span>
+                </div>
+                <div class="suggestion-item" data-command="/help">
+                    <span class="suggestion-command">/help</span>
+                    <span class="suggestion-description">Show available commands</span>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Type a message..." maxlength="500">
+                <button class="chat-send" id="chat-send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <button class="chat-toggle" id="chat-toggle">
+        <i class="fas fa-comment-dots"></i>
+        <span class="chat-notification hidden" id="chat-notification">0</span>
+    </button>
+
+    <script src="js/history.js?v=1.0.2"></script>
+    <script src="js/chat.js"></script>
+</body>
+</html>

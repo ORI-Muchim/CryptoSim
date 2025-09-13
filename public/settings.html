@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoSim</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/settings.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        // Check authentication before loading
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/login';
+        }
+    </script>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-left">
+                <div class="logo">
+                    <i class="fab fa-bitcoin"></i>
+                    <span>CryptoSim</span>
+                </div>
+                <div class="nav-menu">
+                    <a href="/" class="nav-item">Trade</a>
+                    <a href="/?page=markets" class="nav-item">Markets</a>
+                    <a href="/history" class="nav-item">History</a>
+                    <a href="/social" class="nav-item">Social</a>
+                </div>
+            </div>
+            <div class="nav-right">
+                <div class="welcome-message">
+                    <span>Welcome! <span id="current-user">User</span>
+                </div>
+                <div class="account-info">
+                    <div class="wallet-summary">
+                        <div class="wallet-item">
+                            <span class="wallet-label">USDT Balance</span>
+                            <span class="wallet-value" id="krw-balance">$10,000.00</span>
+                        </div>
+                        <div class="wallet-item">
+                            <span class="wallet-label" id="crypto-balance-label">BTC Balance</span>
+                            <span class="wallet-value" id="btc-balance">0.00000000</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-dropdown">
+                    <button class="user-menu-trigger">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/settings" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Account Settings
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="settings-page">
+            <div class="settings-header">
+                <h1><i class="fas fa-cog"></i> Account Settings</h1>
+                <p>Manage your account preferences and display settings</p>
+            </div>
+
+            <div class="settings-content">
+                <!-- Display Settings Section -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h2><i class="fas fa-display"></i> Display Settings</h2>
+                        <p>Customize how information is displayed across the platform</p>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label for="timezone-select">Timezone</label>
+                                <p class="setting-description">Select your preferred timezone for all timestamps and charts</p>
+                            </div>
+                            <div class="setting-control">
+                                <div class="custom-select" id="timezone-select-wrapper">
+                                    <div class="custom-select-trigger" id="timezone-select-trigger">
+                                        <span id="timezone-selected-text">UTC (Coordinated Universal Time)</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="custom-select-options" id="timezone-select-options">
+                                        <div class="custom-option" data-value="UTC">UTC (Coordinated Universal Time)</div>
+                                        <div class="custom-option" data-value="America/New_York">New York (EST/EDT)</div>
+                                        <div class="custom-option" data-value="America/Los_Angeles">Los Angeles (PST/PDT)</div>
+                                        <div class="custom-option" data-value="Europe/London">London (GMT/BST)</div>
+                                        <div class="custom-option" data-value="Europe/Berlin">Berlin (CET/CEST)</div>
+                                        <div class="custom-option" data-value="Europe/Paris">Paris (CET/CEST)</div>
+                                        <div class="custom-option" data-value="Asia/Tokyo">Tokyo (JST)</div>
+                                        <div class="custom-option" data-value="Asia/Seoul">Seoul (KST)</div>
+                                        <div class="custom-option" data-value="Asia/Shanghai">Shanghai (CST)</div>
+                                        <div class="custom-option" data-value="Asia/Hong_Kong">Hong Kong (HKT)</div>
+                                        <div class="custom-option" data-value="Asia/Singapore">Singapore (SGT)</div>
+                                        <div class="custom-option" data-value="Australia/Sydney">Sydney (AEDT/AEST)</div>
+                                    </div>
+                                </div>
+                                <!-- Hidden select for form compatibility -->
+                                <select id="timezone-select" class="hidden">
+                                    <option value="UTC">UTC (Coordinated Universal Time)</option>
+                                    <option value="America/New_York">New York (EST/EDT)</option>
+                                    <option value="America/Los_Angeles">Los Angeles (PST/PDT)</option>
+                                    <option value="Europe/London">London (GMT/BST)</option>
+                                    <option value="Europe/Berlin">Berlin (CET/CEST)</option>
+                                    <option value="Europe/Paris">Paris (CET/CEST)</option>
+                                    <option value="Asia/Tokyo">Tokyo (JST)</option>
+                                    <option value="Asia/Seoul">Seoul (KST)</option>
+                                    <option value="Asia/Shanghai">Shanghai (CST)</option>
+                                    <option value="Asia/Hong_Kong">Hong Kong (HKT)</option>
+                                    <option value="Asia/Singapore">Singapore (SGT)</option>
+                                    <option value="Australia/Sydney">Sydney (AEDT/AEST)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="timezone-preview">
+                            <div class="timezone-preview-content">
+                                <i class="fas fa-clock"></i>
+                                <span id="current-time-display">Current time: </span>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label for="audio-settings">Trading Sounds</label>
+                                <p class="setting-description">Enable or disable sound effects for trading actions</p>
+                            </div>
+                            <div class="setting-control">
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="trading-sounds-toggle" class="toggle-input">
+                                    <label for="trading-sounds-toggle" class="toggle-label">
+                                        <span class="toggle-slider"></span>
+                                        <span class="toggle-text" id="trading-sounds-text">Enabled</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Settings Section -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h2><i class="fas fa-bell"></i> Alert Settings</h2>
+                        <p>Configure price alerts and notifications</p>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label for="price-alerts-toggle">Price Alerts</label>
+                                <p class="setting-description">Get notified when price changes exceed threshold</p>
+                            </div>
+                            <div class="setting-control">
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="price-alerts-toggle" class="toggle-input" checked>
+                                    <label for="price-alerts-toggle" class="toggle-label">
+                                        <span class="toggle-slider"></span>
+                                        <span class="toggle-text" id="price-alerts-text">Enabled</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label for="alert-threshold">Alert Threshold (%)</label>
+                                <p class="setting-description">Trigger alert when price changes by this percentage</p>
+                            </div>
+                            <div class="setting-control">
+                                <div class="slider-container">
+                                    <input type="range" id="alert-threshold" class="slider" min="0.1" max="10" step="0.1" value="1">
+                                    <div class="slider-value" id="threshold-value">1.0%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label for="browser-notifications-toggle">Browser Notifications</label>
+                                <p class="setting-description">Show notifications in your browser</p>
+                            </div>
+                            <div class="setting-control">
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="browser-notifications-toggle" class="toggle-input" checked>
+                                    <label for="browser-notifications-toggle" class="toggle-label">
+                                        <span class="toggle-slider"></span>
+                                        <span class="toggle-text" id="browser-notifications-text">Enabled</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label for="alert-sound-toggle">Alert Sound</label>
+                                <p class="setting-description">Play sound when alerts trigger</p>
+                            </div>
+                            <div class="setting-control">
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="alert-sound-toggle" class="toggle-input" checked>
+                                    <label for="alert-sound-toggle" class="toggle-label">
+                                        <span class="toggle-slider"></span>
+                                        <span class="toggle-text" id="alert-sound-text">Enabled</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label for="email-alerts-toggle">Email Alerts</label>
+                                <p class="setting-description">Receive alerts via email (coming soon)</p>
+                            </div>
+                            <div class="setting-control">
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="email-alerts-toggle" class="toggle-input" disabled>
+                                    <label for="email-alerts-toggle" class="toggle-label">
+                                        <span class="toggle-slider"></span>
+                                        <span class="toggle-text" id="email-alerts-text">Disabled</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Information Section -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h2><i class="fas fa-user"></i> Account Information</h2>
+                        <p>Your account details and statistics</p>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="account-stats">
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-wallet"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>Portfolio Value</h3>
+                                    <p id="portfolio-value">$10,000.00</p>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>Total Trades</h3>
+                                    <p id="total-trades">0</p>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>Member Since</h3>
+                                    <p id="member-since">Today</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone Section -->
+                <div class="settings-card danger-card">
+                    <div class="settings-card-header">
+                        <h2><i class="fas fa-exclamation-triangle"></i> Reset Data</h2>
+                        <p>Reset your trading simulation data</p>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="danger-content">
+                            <p>This will reset your balance to $10,000 and clear all transaction history. This action cannot be undone.</p>
+                            <button class="btn btn-danger" id="reset-account-btn">
+                                <i class="fas fa-refresh"></i> Reset Account Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Settings Button -->
+            <div class="settings-footer">
+                <button class="btn btn-primary btn-large" id="save-settings-btn">
+                    <i class="fas fa-save"></i> Save Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="reset-confirmation-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle text-danger"></i> Confirm Reset</h3>
+                <button class="modal-close" id="close-reset-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to reset your account data?</p>
+                <p><strong>This will:</strong></p>
+                <ul>
+                    <li>Reset your USDT balance to $10,000</li>
+                    <li>Set your BTC balance to 0</li>
+                    <li>Clear all transaction history</li>
+                    <li>Close all leverage positions</li>
+                </ul>
+                <p class="text-danger"><strong>This action cannot be undone!</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-reset-btn">Cancel</button>
+                <button class="btn btn-danger" id="confirm-reset-btn">
+                    <i class="fas fa-refresh"></i> Reset Account Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/settings.js?v=1.0.2"></script>
+</body>
+</html>

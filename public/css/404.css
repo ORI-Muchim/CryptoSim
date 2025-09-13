@@ -1,0 +1,141 @@
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    text-align: center;
+    background: var(--bg-primary);
+}
+
+.error-code {
+    font-size: 150px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-yellow) 0%, var(--accent-red) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 20px;
+    text-shadow: 0 0 80px rgba(255, 184, 0, 0.2);
+}
+
+.error-title {
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.error-message {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 50px;
+    max-width: 500px;
+    line-height: 1.6;
+}
+
+.error-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.error-btn {
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.error-btn-primary {
+    background: var(--accent-green);
+    color: var(--bg-primary);
+}
+
+.error-btn-primary:hover {
+    background: #00b377;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 214, 143, 0.4);
+}
+
+.error-btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.error-btn-secondary:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-light);
+}
+
+.error-illustration {
+    position: relative;
+    margin-bottom: 40px;
+}
+
+.chart-404 {
+    width: 350px;
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.chart-line {
+    stroke: var(--accent-red);
+    stroke-width: 3;
+    fill: none;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 10px rgba(255, 90, 95, 0.5));
+    animation: drawLine 3s ease-in-out infinite;
+}
+
+@keyframes drawLine {
+    0% {
+        stroke-dasharray: 0 1000;
+    }
+    50% {
+        stroke-dasharray: 500 1000;
+    }
+    100% {
+        stroke-dasharray: 0 1000;
+    }
+}
+
+.grid-line {
+    stroke: var(--border-color);
+    stroke-width: 1;
+    opacity: 0.2;
+}
+
+.logo-404 {
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.5;
+}
+
+.logo-404 i {
+    color: var(--accent-yellow);
+    font-size: 24px;
+}
+
+.logo-404 span {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}

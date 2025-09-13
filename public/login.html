@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoSim</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/css/login.css" rel="stylesheet">
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <div class="icon-wrapper">
+                <i class="fab fa-bitcoin"></i>
+            </div>
+            <h1>CryptoSim</h1>
+            <p>Professional Trading Simulator</p>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab-btn active" data-tab="login">
+                <i class="fas fa-sign-in-alt"></i>
+                Login
+            </button>
+            <button class="tab-btn" data-tab="register">
+                <i class="fas fa-user-plus"></i>
+                Sign Up
+            </button>
+        </div>
+
+        <div id="error-message" class="message error-message"></div>
+        <div id="success-message" class="message success-message"></div>
+
+        <!-- Login Form -->
+        <div id="login-tab" class="tab-content active">
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="login-username" placeholder="Enter your username" required autofocus>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="login-password" placeholder="Enter your password" required>
+                        <button type="button" class="password-toggle" aria-label="Show password" data-target="login-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn login-btn" id="login-submit">
+                    Sign In
+                </button>
+            </form>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-tab" class="tab-content">
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="reg-username">Username</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="reg-username" placeholder="Choose a username" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+">
+                    </div>
+                    <div class="password-requirements">3-20 characters, letters, numbers, underscore only</div>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="reg-password" placeholder="Create a password" required minlength="4">
+                        <button type="button" class="password-toggle" aria-label="Show password" data-target="reg-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-requirements">4+ characters</div>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password-confirm">Confirm Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="reg-password-confirm" placeholder="Confirm your password" required>
+                        <button type="button" class="password-toggle" aria-label="Show password" data-target="reg-password-confirm">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn register-btn" id="register-submit">
+                    Create Account
+                </button>
+            </form>
+        </div>
+
+        <div class="demo-section">
+            <div class="divider">
+                <span>or</span>
+            </div>
+
+            <button class="demo-btn" id="demo-btn">
+                <i class="fas fa-play-circle"></i>
+                Start with Demo Account
+            </button>
+
+            <div class="feature-list">
+                <div class="feature-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Real-time cryptocurrency data</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-coins"></i>
+                    <span>$10,000 virtual trading balance</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Risk-free trading simulation</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/login.js"></script>
+</body>
+</html>

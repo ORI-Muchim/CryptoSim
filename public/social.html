@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoSim - Social</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        // Check authentication before loading
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/login';
+        }
+    </script>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-left">
+                <div class="logo">
+                    <i class="fab fa-bitcoin"></i>
+                    <span>CryptoSim</span>
+                </div>
+                <div class="nav-menu">
+                    <a href="/" class="nav-item" id="nav-trade">Trade</a>
+                    <a href="/?page=markets" class="nav-item" id="nav-markets">Markets</a>
+                    <a href="/history" class="nav-item">History</a>
+                    <a href="/social" class="nav-item active">Social</a>
+                </div>
+            </div>
+            <div class="nav-right">
+                <div class="welcome-message">
+                    <span>Welcome! <span id="current-user">User</span>
+                </div>
+                <div class="account-info">
+                    <div class="wallet-summary">
+                        <div class="wallet-item">
+                            <span class="wallet-label">USDT Balance</span>
+                            <span class="wallet-value" id="krw-balance">$10,000.00</span>
+                        </div>
+                        <div class="wallet-item">
+                            <span class="wallet-label" id="crypto-balance-label">BTC Balance</span>
+                            <span class="wallet-value" id="btc-balance">0.00000000</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-dropdown">
+                    <button class="user-menu-trigger">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/settings" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Account Settings
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="social-wrapper">
+        <!-- Social Header -->
+        <div class="social-header-section">
+            <div class="section-header">
+                <h2>Social Hub</h2>
+                <div class="social-info">
+                    <div class="info-item">
+                        <i class="fas fa-users"></i>
+                        <span>Connect with other traders • Follow their strategies</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Navigation Tabs -->
+        <div class="social-nav-tabs">
+            <button class="social-tab active" data-tab="following">
+                <i class="fas fa-heart"></i> Following
+            </button>
+            <button class="social-tab" data-tab="followers">
+                <i class="fas fa-users"></i> Followers
+            </button>
+            <button class="social-tab" data-tab="discover">
+                <i class="fas fa-search"></i> Discover
+            </button>
+            <button class="social-tab" data-tab="activities">
+                <i class="fas fa-chart-line"></i> Activities
+            </button>
+        </div>
+
+        <!-- Following Tab -->
+        <div class="social-tab-content active" id="following-tab">
+            <div class="social-stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="following-count">0</span>
+                    <span class="stat-label">Following</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="followers-count">0</span>
+                    <span class="stat-label">Followers</span>
+                </div>
+            </div>
+            
+            <div class="user-list" id="following-list">
+                <div class="loading-state">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <p>Loading following list...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Followers Tab -->
+        <div class="social-tab-content" id="followers-tab">
+            <div class="user-list" id="followers-list">
+                <div class="loading-state">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <p>Loading followers list...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discover Tab -->
+        <div class="social-tab-content" id="discover-tab">
+            <div class="discover-controls">
+                <div class="search-box">
+                    <input type="text" id="user-search" placeholder="Search users...">
+                    <button id="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="control-group">
+                    <label for="discover-limit">Show top:</label>
+                    <select id="discover-limit" class="control-select">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="rankings-table-section">
+                <div class="rankings-table-container">
+                    <table class="rankings-table">
+                        <thead>
+                            <tr>
+                                <th class="rank-col">Rank</th>
+                                <th class="username-col">Username</th>
+                                <th class="assets-col">Total Assets</th>
+                                <th class="roi-col">ROI</th>
+                                <th class="trades-col">Total Trades</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="discover-table-body">
+                            <!-- Users will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activities Tab -->
+        <div class="social-tab-content" id="activities-tab">
+            <div class="activity-header">
+                <h3>Recent Trading Activities</h3>
+                <p class="activity-note">
+                    <i class="fas fa-clock"></i>
+                    Trading activities are shown with a 10-minute delay for privacy
+                </p>
+            </div>
+            
+            <div class="activities-list" id="activities-list">
+                <div class="loading-state">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <p>Loading trading activities...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state hidden" id="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3 id="empty-title">No Users Found</h3>
+            <p id="empty-message">Start following other traders to see their activities!</p>
+        </div>
+    </div>
+
+    <!-- Community Chat -->
+    <div class="chat-container" id="chat-container">
+        <div class="chat-header">
+            <div class="chat-title">
+                <i class="fas fa-comments"></i>
+                Community Chat
+                <span class="online-count" id="online-count">(0 online)</span>
+            </div>
+            <button class="chat-minimize" id="chat-minimize">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-welcome">
+                Welcome to CryptoSim Community Chat!<br>
+                Share your trades and strategies with other traders.
+            </div>
+        </div>
+        <div class="chat-input-wrapper">
+            <div class="chat-suggestions hidden" id="chat-suggestions">
+                <div class="suggestion-item" data-command="/share">
+                    <span class="suggestion-command">/share</span>
+                    <span class="suggestion-description">Share your last trade</span>
+                </div>
+                <div class="suggestion-item" data-command="/stats">
+                    <span class="suggestion-command">/stats</span>
+                    <span class="suggestion-description">Show your trading statistics</span>
+                </div>
+                <div class="suggestion-item" data-command="/clear">
+                    <span class="suggestion-command">/clear</span>
+                    <span class="suggestion-description">Clear chat history</span>
+                </div>
+                <div class="suggestion-item" data-command="/help">
+                    <span class="suggestion-command">/help</span>
+                    <span class="suggestion-description">Show available commands</span>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Type a message..." maxlength="500">
+                <button class="chat-send" id="chat-send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <button class="chat-toggle" id="chat-toggle">
+        <i class="fas fa-comment-dots"></i>
+        <span class="chat-notification hidden" id="chat-notification">0</span>
+    </button>
+
+    <script src="js/social.js?v=1.0.0"></script>
+    <script src="js/chat.js"></script>
+</body>
+</html>

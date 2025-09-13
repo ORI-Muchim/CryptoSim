@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoSim</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/monitoring.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
+</head>
+<body>
+    <div class="monitoring-container">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">
+                <i class="fas fa-chart-line"></i>
+                CryptoSim Monitoring
+            </h1>
+            <div class="status-indicator">
+                <div class="status-light" id="system-status"></div>
+                <span id="status-text">System Healthy</span>
+                <div class="refresh-controls">
+                    <button class="refresh-btn" onclick="refreshData()">
+                        <i class="fas fa-refresh"></i> Refresh
+                    </button>
+                    <div class="auto-refresh">
+                        <input type="checkbox" id="auto-refresh" checked>
+                        <label for="auto-refresh">Auto Refresh</label>
+                    </div>
+                    <select id="refresh-interval" class="refresh-select">
+                        <option value="1000">1s</option>
+                        <option value="5000" selected>5s</option>
+                        <option value="10000">10s</option>
+                        <option value="30000">30s</option>
+                    </select>
+                    <button class="export-btn" onclick="exportMetrics()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Alert Summary Section -->
+        <div class="alert-summary" id="alert-summary">
+            <div class="alert-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Active Alerts</span>
+                <button class="dismiss-all-btn" onclick="dismissAllAlerts()">Dismiss All</button>
+            </div>
+            <div class="alert-list" id="alert-list"></div>
+        </div>
+
+        <div class="metrics-grid">
+            <!-- CPU Usage -->
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">
+                        <i class="fas fa-microchip"></i>
+                        CPU Usage
+                    </div>
+                </div>
+                <div class="metric-value" id="cpu-usage">--</div>
+                <div class="metric-subtitle">Current CPU utilization</div>
+                <div class="chart-container">
+                    <canvas id="cpu-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Memory Usage -->
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">
+                        <i class="fas fa-memory"></i>
+                        Memory Usage
+                    </div>
+                </div>
+                <div class="metric-value" id="memory-usage">--</div>
+                <div class="metric-subtitle">RAM utilization</div>
+                <div class="chart-container">
+                    <canvas id="memory-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Response Time -->
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">
+                        <i class="fas fa-clock"></i>
+                        Response Time
+                    </div>
+                </div>
+                <div class="metric-value" id="response-time">--</div>
+                <div class="metric-subtitle">Average API response time</div>
+                <div class="chart-container">
+                    <canvas id="response-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Active Connections -->
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">
+                        <i class="fas fa-users"></i>
+                        WebSocket Connections
+                    </div>
+                </div>
+                <div class="metric-value" id="ws-connections">--</div>
+                <div class="metric-subtitle">Active WebSocket connections</div>
+                <div class="chart-container">
+                    <canvas id="connections-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Error Rate -->
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Error Rate
+                    </div>
+                </div>
+                <div class="metric-value" id="error-rate">--</div>
+                <div class="metric-subtitle">Request error percentage</div>
+                <div class="chart-container">
+                    <canvas id="error-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Request Volume -->
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">
+                        <i class="fas fa-exchange-alt"></i>
+                        Request Volume
+                    </div>
+                </div>
+                <div class="metric-value" id="request-volume">--</div>
+                <div class="metric-subtitle">Requests per minute</div>
+                <div class="chart-container">
+                    <canvas id="requests-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Section -->
+        <div class="alerts-section">
+            <div class="alerts-header">
+                <h2>
+                    <i class="fas fa-bell"></i>
+                    Active Alerts
+                </h2>
+            </div>
+            <div id="alerts-container">
+                <div class="alert-item">
+                    <div class="alert-icon">
+                        <i class="fas fa-info-circle alert-icon-blue"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-message">No active alerts</div>
+                        <div class="alert-time">System running normally</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Logs -->
+        <div class="logs-section">
+            <div class="alerts-header">
+                <h2>
+                    <i class="fas fa-file-text"></i>
+                    System Logs
+                </h2>
+                <button class="refresh-btn" onclick="clearLogs()">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+            </div>
+            <div class="logs-container" id="logs-container">
+                <div class="log-entry info">[INFO] Monitoring dashboard initialized</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/monitoring-auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoSim</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <script>
+        // Check authentication before loading
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/login';
+        }
+    </script>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-left">
+                <div class="logo">
+                    <i class="fab fa-bitcoin"></i>
+                    <span>CryptoSim</span>
+                </div>
+                <div class="nav-menu">
+                    <a href="/" class="nav-item active" data-page="trade">Trade</a>
+                    <a href="/?page=markets" class="nav-item" data-page="markets">Markets</a>
+                    <a href="/history" class="nav-item" data-page="history">History</a>
+                    <a href="/social" class="nav-item" data-page="social">Social</a>
+                </div>
+            </div>
+            <div class="nav-right">
+                <div class="welcome-message">
+                    <span>Welcome! <span id="current-user">User</span>
+                </div>
+                <div class="account-info">
+                    <div class="wallet-summary">
+                        <div class="wallet-item">
+                            <span class="wallet-label">USDT Balance</span>
+                            <span class="wallet-value" id="krw-balance">$10,000.00</span>
+                        </div>
+                        <div class="wallet-item">
+                            <span class="wallet-label" id="crypto-balance-label">BTC Balance</span>
+                            <span class="wallet-value" id="btc-balance">0.00000000</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-dropdown">
+                    <button class="user-menu-trigger">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/settings" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Account Settings
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Trading Interface -->
+    <div class="main-wrapper" id="trade-page">
+        <!-- Market Header -->
+        <div class="market-header">
+            <div class="market-selector">
+                <button class="market-select-btn" id="market-select-btn">
+                    <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1.png" alt="BTC" class="coin-icon">
+                    <div class="market-name">
+                        <span class="symbol">BTC/USDT</span>
+                        <span class="type">Perpetual</span>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="market-dropdown" id="market-dropdown">
+                    <div class="market-dropdown-item" data-market="BTC/USDT">
+                        <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1.png" alt="BTC" class="dropdown-coin-icon">
+                        <div class="dropdown-market-info">
+                            <span class="dropdown-symbol">BTC/USDT</span>
+                            <span class="dropdown-name">Bitcoin</span>
+                        </div>
+                    </div>
+                    <div class="market-dropdown-item" data-market="ETH/USDT">
+                        <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png" alt="ETH" class="dropdown-coin-icon">
+                        <div class="dropdown-market-info">
+                            <span class="dropdown-symbol">ETH/USDT</span>
+                            <span class="dropdown-name">Ethereum</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="market-stats">
+                <div class="stat-group">
+                    <div class="main-price">
+                        <span id="btc-price" class="price">$0.00</span>
+                        <span id="price-change" class="change positive">+0.00%</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <span class="label">24h High</span>
+                    <span class="value" id="high-price">$0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">24h Low</span>
+                    <span class="value" id="low-price">$0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">24h Volume</span>
+                    <span class="value" id="volume">0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">P&L</span>
+                    <span class="value" id="profit-rate">0.00%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trading Layout -->
+        <div class="trading-layout">
+            <!-- Chart Section -->
+            <div class="chart-section">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-header-left">
+                            <div class="timeframe-selector">
+                                <button class="tf-btn active" data-interval="1m">1m</button>
+                                <button class="tf-btn" data-interval="5m">5m</button>
+                                <button class="tf-btn" data-interval="15m">15m</button>
+                                <button class="tf-btn" data-interval="1h">1H</button>
+                                <button class="tf-btn" data-interval="4h">4H</button>
+                                <button class="tf-btn" data-interval="1d">1D</button>
+                            </div>
+                            <div class="chart-type-selector">
+                                <button class="chart-type-btn active" data-type="candlestick" title="Candlestick">
+                                    <i class="fas fa-chart-bar"></i>
+                                </button>
+                                <button class="chart-type-btn" data-type="line" title="Line Chart">
+                                    <i class="fas fa-chart-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-header-center">
+                            <div class="indicators-toolbar">
+                                <button class="indicator-btn" data-indicator="ma" title="Moving Average">
+                                    <span>MA</span>
+                                </button>
+                                <button class="indicator-btn" data-indicator="ema" title="Exponential Moving Average">
+                                    <span>EMA</span>
+                                </button>
+                                <button class="indicator-btn" data-indicator="bollinger" title="Bollinger Bands">
+                                    <span>BB</span>
+                                </button>
+                                <button class="indicator-btn" data-indicator="rsi" title="RSI">
+                                    <span>RSI</span>
+                                </button>
+                                <button class="indicator-btn" data-indicator="macd" title="MACD">
+                                    <span>MACD</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-tools">
+                            <div class="drawing-tools-group">
+                                <button class="tool-btn" id="horizontal-line-btn" data-tool="horizontal" title="Horizontal Line">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <button class="tool-btn" id="trend-line-btn" data-tool="trend" title="Trend Line">
+                                    <i class="fas fa-chart-line"></i>
+                                </button>
+                                <button class="tool-btn" id="fib-retracement-btn" data-tool="fibonacci" title="Fibonacci Retracement">
+                                    <i class="fas fa-wave-square"></i>
+                                </button>
+                                <button class="tool-btn" id="clear-drawings-btn" title="Clear Drawings">
+                                    <i class="fas fa-eraser"></i>
+                                </button>
+                            </div>
+                            <button class="tool-btn" title="Screenshot">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <button class="tool-btn" title="Fullscreen">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                            <button class="tool-btn" id="chart-settings-btn" title="Settings">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="tradingview-chart" class="chart-area"></div>
+                </div>
+                
+                <!-- Positions & Trades at bottom of chart -->
+                <div class="chart-bottom-section">
+                    <div class="chart-bottom-tabs">
+                        <button class="chart-bottom-tab active" data-tab="positions">Positions</button>
+                        <button class="chart-bottom-tab" data-tab="trades">Trades</button>
+                    </div>
+                    
+                    <div id="positions-panel" class="chart-bottom-panel active">
+                        <div class="panel-actions">
+                            <button class="close-all-btn">Close All</button>
+                        </div>
+                        <div id="active-positions" class="positions-list">
+                            <div class="empty-state">
+                                <i class="fas fa-chart-bar"></i>
+                                <p>No active positions</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="trades-panel" class="chart-bottom-panel">
+                        <div id="transaction-history" class="trades-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Book Section -->
+            <div class="orderbook-section">
+                <div class="orderbook-container">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-layer-group"></i> Order Book</h3>
+                        <div class="orderbook-controls">
+                            <div class="precision-selector">
+                                <select id="price-precision" class="precision-dropdown">
+                                    <option value="2">0.01</option>
+                                    <option value="1">0.1</option>
+                                    <option value="0" selected>1</option>
+                                </select>
+                            </div>
+                            <button class="ob-control active" data-view="both" title="Both">
+                                <i class="fas fa-align-justify"></i>
+                            </button>
+                            <button class="ob-control" data-view="asks" title="Asks Only">
+                                <i class="fas fa-sort-amount-down"></i>
+                            </button>
+                            <button class="ob-control" data-view="bids" title="Bids Only">
+                                <i class="fas fa-sort-amount-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="orderbook-header">
+                        <span class="header-price">Price (USDT)</span>
+                        <span class="header-amount">Size (BTC)</span>
+                        <span class="header-total">Total</span>
+                    </div>
+                    
+                    <div class="orderbook-content">
+                        <!-- Market Depth Visualization -->
+                        <div class="depth-chart-mini" id="depth-chart-mini">
+                            <canvas id="depth-canvas" width="300" height="60"></canvas>
+                        </div>
+                        
+                        <!-- Asks Section -->
+                        <div id="asks" class="asks orderbook-side">
+                            <div class="orderbook-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                Loading orders...
+                            </div>
+                        </div>
+                        
+                        <!-- Spread Section -->
+                        <div class="orderbook-spread">
+                            <div class="spread-info">
+                                <span class="spread-label">Spread</span>
+                                <span class="spread-value" id="orderbook-spread">0.00</span>
+                                <span class="spread-percentage" id="spread-percentage">(0.00%)</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Bids Section -->
+                        <div id="bids" class="bids orderbook-side">
+                            <div class="orderbook-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                Loading orders...
+                            </div>
+                        </div>
+                        
+                        <!-- Market Depth Stats -->
+                        <div class="market-depth-stats">
+                            <div class="depth-stat">
+                                <span class="stat-label">Bids:</span>
+                                <span class="stat-value bid-total" id="total-bids">0.00</span>
+                            </div>
+                            <div class="depth-stat">
+                                <span class="stat-label">Asks:</span>
+                                <span class="stat-value ask-total" id="total-asks">0.00</span>
+                            </div>
+                            <div class="depth-stat">
+                                <span class="stat-label">Ratio:</span>
+                                <span class="stat-value ratio" id="bid-ask-ratio">0.0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trading Section -->
+            <div class="trading-section">
+                <!-- Order Form -->
+                <div class="order-form-container">
+                    <div class="order-tabs">
+                        <button class="order-tab active" data-type="spot">Spot</button>
+                        <button class="order-tab" data-type="leverage">Futures</button>
+                    </div>
+
+                    <!-- Spot Trading -->
+                    <div id="spot-trading" class="order-content active">
+                        <!-- Current Price Display -->
+                        <div class="current-price-display">
+                            <span class="price-label">Current Price:</span>
+                            <span class="price-value" id="current-btc-price">$0.00</span>
+                        </div>
+                        
+                        <!-- Spot Profit Display -->
+                        <div class="spot-profit-display" id="spot-profit-display">
+                            <div class="profit-section">
+                                <div class="profit-crypto-title" id="current-crypto-title">Bitcoin (BTC)</div>
+                                <div class="profit-item">
+                                    <span class="profit-label">P&L:</span>
+                                    <span class="profit-combined" id="current-profit-combined">$0.00 (0.00%)</span>
+                                </div>
+                                <div class="profit-item">
+                                    <span class="profit-label">Avg Buy:</span>
+                                    <span class="profit-avg-price" id="current-avg-price">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Order Type Selection -->
+                        <div class="order-type-selector">
+                            <button class="order-type-btn active" data-type="market">Market</button>
+                            <button class="order-type-btn" data-type="limit">Limit</button>
+                        </div>
+                        
+                        <!-- Buy Section -->
+                        <div class="buy-section">
+                            <h3 class="side-title buy">Buy Crypto</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Price</label>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="buy-price" placeholder="Market" readonly>
+                                        <span class="input-suffix">USDT</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Amount</label>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="buy-amount" placeholder="0.00000000" step="0.00000001">
+                                        <span class="input-suffix">BTC</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Total</label>
+                                <div class="input-wrapper">
+                                    <input type="text" id="buy-total" readonly placeholder="0.00">
+                                    <span class="input-suffix">USDT</span>
+                                </div>
+                                <small id="spot-buy-fee-info" class="fee-info">Fee: 0.050% (Taker)</small>
+                            </div>
+                            <div class="balance-info">
+                                <span>Available:</span>
+                                <span class="available-balance">$10,000.00</span>
+                            </div>
+                            <button class="order-btn buy-btn" id="buy-btn">Buy</button>
+                        </div>
+                        
+                        <!-- Sell Section -->
+                        <div class="sell-section">
+                            <h3 class="side-title sell">Sell Crypto</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Price</label>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="sell-price" placeholder="Market" readonly>
+                                        <span class="input-suffix">USDT</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Amount</label>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="sell-amount" placeholder="0.00000000" step="0.00000001">
+                                        <span class="input-suffix">BTC</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="percentage-buttons">
+                                <button class="percentage-btn" data-percentage="25">25%</button>
+                                <button class="percentage-btn" data-percentage="50">50%</button>
+                                <button class="percentage-btn" data-percentage="100">100%</button>
+                            </div>
+                            <div class="form-group">
+                                <label>Total</label>
+                                <div class="input-wrapper">
+                                    <input type="text" id="sell-total" readonly placeholder="0.00">
+                                    <span class="input-suffix">USDT</span>
+                                </div>
+                                <small id="spot-sell-fee-info" class="fee-info">Fee: 0.050% (Taker)</small>
+                            </div>
+                            <div class="balance-info">
+                                <span>Available:</span>
+                                <span class="available-btc">0.00000000 BTC</span>
+                            </div>
+                            <button class="order-btn sell-btn" id="sell-btn">Sell</button>
+                        </div>
+                    </div>
+
+                    <!-- Leverage Trading -->
+                    <div id="leverage-trading" class="order-content">
+                        <div class="leverage-controls">
+                            <div class="position-selector">
+                                <button class="position-btn active" data-position="long">
+                                    <i class="fas fa-arrow-up"></i> Long
+                                </button>
+                                <button class="position-btn" data-position="short">
+                                    <i class="fas fa-arrow-down"></i> Short
+                                </button>
+                            </div>
+                            
+                            <div class="leverage-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Leverage</label>
+                                        <select id="leverage-select" class="leverage-select">
+                                            <option value="1">1x</option>
+                                            <option value="2">2x</option>
+                                            <option value="3">3x</option>
+                                            <option value="5">5x</option>
+                                            <option value="10" selected>10x</option>
+                                            <option value="20">20x</option>
+                                            <option value="30">30x</option>
+                                            <option value="50">50x</option>
+                                            <option value="75">75x</option>
+                                            <option value="100">100x</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Margin</label>
+                                        <div class="input-wrapper">
+                                            <input type="number" id="leverage-amount" placeholder="0.00">
+                                            <span class="input-suffix">USDT</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Position Size</label>
+                                    <input type="text" id="position-size" readonly placeholder="0.00 USDT">
+                                    <small id="leverage-fee-info" class="fee-info">Fees: 0.050% each way (Taker)</small>
+                                </div>
+                                
+                                <button class="order-btn leverage-btn" id="open-position-btn">
+                                    Open Position
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Markets Page -->
+    <div class="main-wrapper hidden" id="markets-page">
+        <div class="markets-container">
+            <h2 class="markets-title">Cryptocurrency Markets</h2>
+            <div class="markets-grid">
+                <div class="market-card" data-market="BTC/USDT">
+                    <div class="market-card-header">
+                        <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1.png" alt="BTC" class="market-icon">
+                        <div class="market-info">
+                            <h3>Bitcoin</h3>
+                            <span class="market-symbol">BTC/USDT</span>
+                        </div>
+                    </div>
+                    <div class="market-card-body">
+                        <div class="market-price-info">
+                            <span class="market-price" id="btc-market-price">$0.00</span>
+                            <span class="market-change" id="btc-market-change">0.00%</span>
+                        </div>
+                        <div class="market-stats-grid">
+                            <div class="market-stat">
+                                <span class="stat-label">24h Volume</span>
+                                <span class="stat-value" id="btc-market-volume">0</span>
+                            </div>
+                            <div class="market-stat">
+                                <span class="stat-label">24h High</span>
+                                <span class="stat-value" id="btc-market-high">$0.00</span>
+                            </div>
+                            <div class="market-stat">
+                                <span class="stat-label">24h Low</span>
+                                <span class="stat-value" id="btc-market-low">$0.00</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary market-trade-btn" data-market="BTC/USDT">Trade</button>
+                    </div>
+                </div>
+                
+                <div class="market-card" data-market="ETH/USDT">
+                    <div class="market-card-header">
+                        <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png" alt="ETH" class="market-icon">
+                        <div class="market-info">
+                            <h3>Ethereum</h3>
+                            <span class="market-symbol">ETH/USDT</span>
+                        </div>
+                    </div>
+                    <div class="market-card-body">
+                        <div class="market-price-info">
+                            <span class="market-price" id="eth-market-price">$0.00</span>
+                            <span class="market-change" id="eth-market-change">0.00%</span>
+                        </div>
+                        <div class="market-stats-grid">
+                            <div class="market-stat">
+                                <span class="stat-label">24h Volume</span>
+                                <span class="stat-value" id="eth-market-volume">0</span>
+                            </div>
+                            <div class="market-stat">
+                                <span class="stat-label">24h High</span>
+                                <span class="stat-value" id="eth-market-high">$0.00</span>
+                            </div>
+                            <div class="market-stat">
+                                <span class="stat-label">24h Low</span>
+                                <span class="stat-value" id="eth-market-low">$0.00</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary market-trade-btn" data-market="ETH/USDT">Trade</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Chart Settings Modal -->
+    <div id="chart-settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Chart Settings</h3>
+                <button class="modal-close" id="close-settings-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h4>Moving Averages</h4>
+                    <div id="ma-list">
+                        <div class="ma-item" data-ma-id="1">
+                            <div class="setting-group">
+                                <label>MA Period:</label>
+                                <input type="number" class="ma-period" value="20" min="1" max="200">
+                                <select class="ma-type">
+                                    <option value="sma">SMA</option>
+                                    <option value="ema">EMA</option>
+                                </select>
+                                <button class="remove-ma-btn" data-ma-id="1">×</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="add-ma-btn" class="btn btn-secondary">Add MA/EMA</button>
+                </div>
+                
+                <div class="settings-section">
+                    <h4>Bollinger Bands</h4>
+                    <div class="setting-group">
+                        <label>Period:</label>
+                        <input type="number" id="bb-period" value="20" min="1" max="200">
+                    </div>
+                    <div class="setting-group">
+                        <label>Standard Deviation:</label>
+                        <input type="number" id="bb-std" value="2" min="0.1" max="5" step="0.1">
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h4>RSI</h4>
+                    <div class="setting-group">
+                        <label>RSI Period:</label>
+                        <input type="number" id="rsi-period" value="14" min="1" max="100">
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h4>MACD</h4>
+                    <div class="setting-group">
+                        <label>Fast EMA:</label>
+                        <input type="number" id="macd-fast" value="12" min="1" max="100">
+                    </div>
+                    <div class="setting-group">
+                        <label>Slow EMA:</label>
+                        <input type="number" id="macd-slow" value="26" min="1" max="100">
+                    </div>
+                    <div class="setting-group">
+                        <label>Signal Line:</label>
+                        <input type="number" id="macd-signal" value="9" min="1" max="50">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="reset-settings">Reset to Default</button>
+                <button class="btn btn-primary" id="apply-settings">Apply Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Chat -->
+    <div class="chat-container" id="chat-container">
+        <div class="chat-header">
+            <div class="chat-title">
+                <i class="fas fa-comments"></i>
+                Community Chat
+                <span class="online-count" id="online-count">(0 online)</span>
+            </div>
+            <button class="chat-minimize" id="chat-minimize">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-welcome">
+                Welcome to CryptoSim Community Chat!<br>
+                Share your trades and strategies with other traders.
+            </div>
+        </div>
+        <div class="chat-input-wrapper">
+            <div class="chat-suggestions hidden" id="chat-suggestions">
+                <div class="suggestion-item" data-command="/share">
+                    <span class="suggestion-command">/share</span>
+                    <span class="suggestion-desc">Share your last trade</span>
+                </div>
+                <div class="suggestion-item" data-command="/help">
+                    <span class="suggestion-command">/help</span>
+                    <span class="suggestion-desc">Show available commands</span>
+                </div>
+                <div class="suggestion-item" data-command="/stats">
+                    <span class="suggestion-command">/stats</span>
+                    <span class="suggestion-desc">Show your trading statistics</span>
+                </div>
+                <div class="suggestion-item" data-command="/clear">
+                    <span class="suggestion-command">/clear</span>
+                    <span class="suggestion-desc">Clear chat history (local)</span>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Type a message..." maxlength="500">
+                <button class="chat-send" id="chat-send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <button class="chat-toggle" id="chat-toggle">
+        <i class="fas fa-comment-dots"></i>
+        <span class="chat-notification hidden" id="chat-notification">0</span>
+    </button>
+
+    <!-- Position Stop Orders Modal -->
+    <div class="position-stop-modal" id="position-stop-modal">
+        <div class="position-stop-content">
+            <div class="position-stop-header">
+                <h3 class="position-stop-title">Stop Loss & Take Profit</h3>
+                <button class="modal-close-btn" id="modal-close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="position-info-summary" id="position-info-summary">
+                <!-- Position info will be populated here -->
+            </div>
+            
+            <div class="stop-orders-section">
+                <!-- Stop Loss Section -->
+                <div class="stop-order-card stop-loss-card">
+                    <div class="stop-card-header">
+                        <label class="stop-label">
+                            <input type="checkbox" id="modal-stop-loss-enabled" class="stop-checkbox">
+                            <span class="stop-icon">🛑</span>
+                            <span>Stop Loss</span>
+                        </label>
+                        <div class="current-price-ref" id="modal-stop-loss-current">Current: $0</div>
+                    </div>
+                    <div class="stop-input-methods hidden" id="modal-stop-loss-inputs">
+                        <div class="input-method-tabs">
+                            <button type="button" class="method-tab active" data-method="percent" data-type="modal-stop-loss">Percent</button>
+                            <button type="button" class="method-tab" data-method="price" data-type="modal-stop-loss">Price</button>
+                        </div>
+                        <div class="method-content percent-method active">
+                            <label>Loss Percentage</label>
+                            <div class="range-input-wrapper">
+                                <input type="range" id="modal-stop-loss-percent-slider" min="1" max="50" value="10" step="1">
+                                <div class="range-value">-<span id="modal-stop-loss-percent-value">10</span>%</div>
+                            </div>
+                            <div class="calculated-price">Trigger Price: $<span id="modal-stop-loss-calculated">0</span></div>
+                        </div>
+                        <div class="method-content price-method">
+                            <label>Stop Loss Price</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="modal-stop-loss-price" placeholder="Enter stop loss price" step="0.01">
+                                <span class="input-suffix">USDT</span>
+                            </div>
+                            <div class="calculated-percent">Loss: -<span id="modal-stop-loss-calculated-percent">0</span>%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Take Profit Section -->
+                <div class="stop-order-card take-profit-card">
+                    <div class="stop-card-header">
+                        <label class="stop-label">
+                            <input type="checkbox" id="modal-take-profit-enabled" class="stop-checkbox">
+                            <span class="stop-icon">💰</span>
+                            <span>Take Profit</span>
+                        </label>
+                        <div class="current-price-ref" id="modal-take-profit-current">Current: $0</div>
+                    </div>
+                    <div class="stop-input-methods hidden" id="modal-take-profit-inputs">
+                        <div class="input-method-tabs">
+                            <button type="button" class="method-tab active" data-method="percent" data-type="modal-take-profit">Percent</button>
+                            <button type="button" class="method-tab" data-method="price" data-type="modal-take-profit">Price</button>
+                        </div>
+                        <div class="method-content percent-method active">
+                            <label>Profit Percentage</label>
+                            <div class="range-input-wrapper">
+                                <input type="range" id="modal-take-profit-percent-slider" min="1" max="100" value="20" step="1">
+                                <div class="range-value">+<span id="modal-take-profit-percent-value">20</span>%</div>
+                            </div>
+                            <div class="calculated-price profit">Trigger Price: $<span id="modal-take-profit-calculated">0</span></div>
+                        </div>
+                        <div class="method-content price-method">
+                            <label>Take Profit Price</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="modal-take-profit-price" placeholder="Enter take profit price" step="0.01">
+                                <span class="input-suffix">USDT</span>
+                            </div>
+                            <div class="calculated-percent profit">Profit: +<span id="modal-take-profit-calculated-percent">0</span>%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-action-buttons">
+                    <button class="btn btn-primary modal-btn" id="save-stop-orders">Save</button>
+                    <button class="btn btn-secondary modal-btn" id="cancel-stop-orders">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js?v=1.0.9"></script>
+    <script src="js/chat.js"></script>
+</body>
+</html>
